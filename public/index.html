@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SALT — Leadership Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0d0d0d;
+  --white: #f5f2eb;
+  --cream: #ede9df;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --green-light: #52b788;
+  --red: #b5332a;
+  --muted: #7a7468;
+  --card: #1a1a18;
+  --card2: #222220;
+  --border: rgba(201,168,76,0.2);
+  --coach-bg: #1c1e1a;
+  --athlete-bg: #1a1c22;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--black);
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 4px;
+  color: var(--gold);
+}
+
+.module-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.mastery-bar {
+  padding: 10px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.mastery-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.streak-dots { display: flex; gap: 8px; }
+
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  background: transparent;
+  transition: all 0.4s ease;
+}
+.dot.filled {
+  background: var(--green-light);
+  border-color: var(--green-light);
+  box-shadow: 0 0 8px rgba(82,183,136,0.5);
+}
+
+.concept-tags {
+  display: flex; gap: 6px;
+  margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.concept-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+.concept-tag.tested   { border-color: var(--gold); color: var(--gold); }
+.concept-tag.mastered { border-color: var(--green-light); color: var(--green-light); background: rgba(82,183,136,0.08); }
+
+.main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 32px 20px 100px;
+}
+
+.scenario-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  animation: slideUp 0.5s forwards;
+}
+
+.scenario-sport-bar {
+  background: var(--gold);
+  padding: 7px 18px;
+}
+.scenario-sport-bar span {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--black);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.scenario-body {
+  padding: 20px 22px;
+  font-size: 16px;
+  line-height: 1.8;
+  font-weight: 300;
+  color: var(--white);
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.bubble {
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-size: 15px;
+  line-height: 1.75;
+  font-weight: 300;
+  animation: slideUp 0.4s forwards;
+}
+
+.bubble.coach {
+  background: var(--coach-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  color: var(--cream);
+}
+
+.bubble.athlete {
+  background: var(--athlete-bg);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-right: 3px solid rgba(82,183,136,0.5);
+  color: var(--white);
+  margin-left: 32px;
+}
+
+.bubble-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.bubble.coach   .bubble-label { color: var(--gold); }
+.bubble.athlete .bubble-label { color: var(--green-light); }
+
+.exchange-counter {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exchange-pips { display: flex; gap: 5px; }
+
+.pip {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+  background: transparent;
+  transition: all 0.3s;
+}
+.pip.used { background: var(--gold); border-color: var(--gold); }
+.pip.last { background: var(--red); border-color: var(--red); }
+
+.input-area { animation: slideUp 0.4s 0.1s both; }
+
+.response-area {
+  width: 100%;
+  min-height: 110px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--white);
+  resize: none;
+  outline: none;
+  transition: border-color 0.3s;
+  line-height: 1.6;
+}
+.response-area:focus { border-color: var(--gold); }
+.response-area::placeholder { color: var(--muted); }
+
+.submit-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px;
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 17px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.wrapup-card {
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  animation: slideUp 0.5s forwards;
+}
+.wrapup-card.mastered-round { border: 1px solid rgba(82,183,136,0.4); background: rgba(82,183,136,0.06); }
+.wrapup-card.not-mastered   { border: 1px solid rgba(201,168,76,0.3); background: rgba(201,168,76,0.05); }
+
+.wrapup-header {
+  padding: 9px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.wrapup-card.mastered-round .wrapup-header { background: rgba(82,183,136,0.15); color: var(--green-light); }
+.wrapup-card.not-mastered   .wrapup-header { background: rgba(201,168,76,0.12); color: var(--gold); }
+
+.wrapup-body {
+  padding: 18px 20px;
+  font-size: 15px;
+  line-height: 1.8;
+  font-weight: 300;
+}
+.wrapup-card.mastered-round .wrapup-body { color: #cce8da; }
+.wrapup-card.not-mastered   .wrapup-body { color: var(--cream); }
+
+.continue-btn {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  color: var(--gold);
+  border: 1.5px solid var(--gold);
+  border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 17px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  animation: slideUp 0.4s 0.2s both;
+}
+.continue-btn:hover { background: var(--gold); color: var(--black); }
+
+.mastery-screen {
+  text-align: center;
+  padding: 60px 20px;
+  animation: slideUp 0.6s forwards;
+}
+.mastery-icon { font-size: 60px; display: block; margin-bottom: 20px; animation: bounce 0.6s 0.3s both; }
+.mastery-headline { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 6px; color: var(--gold); margin-bottom: 14px; }
+.mastery-sub { font-size: 16px; color: var(--muted); font-weight: 300; max-width: 380px; margin: 0 auto 32px; }
+.mastery-concept {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(82,183,136,0.1);
+  border: 1px solid rgba(82,183,136,0.3);
+  border-radius: 30px; padding: 5px 14px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--green-light); letter-spacing: 1.5px;
+  text-transform: uppercase; margin: 3px;
+}
+.next-module-btn {
+  margin-top: 28px; padding: 16px 36px;
+  background: var(--gold); color: var(--black);
+  border: none; border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 19px; letter-spacing: 3px;
+  cursor: pointer; transition: all 0.2s;
+}
+.next-module-btn:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+.loading-indicator {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 0; color: var(--muted);
+  font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px;
+}
+.spinner {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border: 2px solid var(--border); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+
+.progress-track { height: 2px; background: rgba(255,255,255,0.06); border-radius: 2px; flex: 1; overflow: hidden; max-width: 140px; }
+.progress-fill  { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.6s ease; }
+
+@keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin    { to { transform:rotate(360deg); } }
+@keyframes bounce  { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.15)} 80%{transform:scale(0.95)} 100%{transform:scale(1);opacity:1} }
+
+@media (max-width: 480px) {
+  header { padding: 14px 16px; }
+  .main  { padding: 20px 14px 80px; }
+  .bubble.athlete { margin-left: 16px; }
+  .concept-tags { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SALT</div>
+  <div class="module-badge">Module 1 · Leadership</div>
+</header>
+
+<div class="mastery-bar">
+  <div class="mastery-label">Streak</div>
+  <div class="streak-dots">
+    <div class="dot" id="dot0"></div>
+    <div class="dot" id="dot1"></div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="concept-tags" id="conceptTags">
+    <div class="concept-tag" id="tag-vision">Vision</div>
+    <div class="concept-tag" id="tag-integrity">Integrity</div>
+    <div class="concept-tag" id="tag-empathy">Empathy</div>
+    <div class="concept-tag" id="tag-courage">Courage</div>
+    <div class="concept-tag" id="tag-communication">Communication</div>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<script>
+// API key is handled server-side
+const MAX_EXCHANGES = 4;
+const MASTERY_STREAK = 2;
+
+const S = {
+  round: 1,
+  streak: 0,
+  masteredConcepts: new Set(),
+  testedConcepts: new Set(),
+  currentConcepts: [],
+  scenario: '',
+  scenarioSport: '',
+  thread: [],
+  apiMessages: [],
+  exchangeCount: 0,
+};
+
+const CONCEPTS = {
+  vision: {
+    name: 'Vision',
+    definition: 'A leader has a clear idea of what they want to achieve. A strong vision inspires people to work together.',
+    cue: 'What picture of the future are you painting for your team?'
+  },
+  integrity: {
+    name: 'Integrity',
+    definition: 'Leaders with integrity act ethically and honestly even when it\'s difficult. They keep promises and uphold high standards.',
+    cue: 'Would you make this same choice if the whole team was watching?'
+  },
+  empathy: {
+    name: 'Empathy',
+    definition: 'Empathy is the ability to understand how someone else feels and see things from their perspective.',
+    cue: 'What might this feel like from your teammate\'s point of view?'
+  },
+  courage: {
+    name: 'Courage',
+    definition: 'Courage allows leaders to stand up for what they believe in, make tough decisions, and take risks — knowing failure is part of learning.',
+    cue: 'What would you do here if you knew you couldn\'t fail?'
+  },
+  communication: {
+    name: 'Communication',
+    definition: 'Clear communication is key to leadership. A good leader explains their vision clearly and listens actively.',
+    cue: 'How would you make sure every teammate truly understood the message?'
+  }
+};
+
+const SPORTS = ['basketball','football','soccer','volleyball','track','baseball','softball','swimming'];
+const SPORT_EMOJI = {basketball:'🏀',football:'🏈',soccer:'⚽',volleyball:'🏐',track:'🏃',baseball:'⚾',softball:'🥎',swimming:'🏊'};
+
+async function callClaude(messages, system) {
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system, messages })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content?.[0]?.text || '';
+}
+
+function el(id) { return document.getElementById(id); }
+function mc(html) { el('mainContent').innerHTML = html; }
+
+function appendLoading(msg) {
+  const t = el('threadArea');
+  const html = `<div class="loading-indicator" id="loader"><div class="spinner"></div>${msg}</div>`;
+  if (t) { t.insertAdjacentHTML('beforeend', html); scrollBottom(); }
+  else mc(html);
+}
+function removeLoader() { const l = el('loader'); if (l) l.remove(); }
+function scrollBottom() { setTimeout(() => window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}), 80); }
+
+function updateUI() {
+  for (let i = 0; i < MASTERY_STREAK; i++) {
+    const d = el(`dot${i}`);
+    if (d) d.className = 'dot' + (i < S.streak ? ' filled' : '');
+  }
+  for (const [k] of Object.entries(CONCEPTS)) {
+    const t = el(`tag-${k}`);
+    if (!t) continue;
+    t.className = 'concept-tag' + (S.masteredConcepts.has(k) ? ' mastered' : S.testedConcepts.has(k) ? ' tested' : '');
+  }
+  el('progressFill').style.width = Math.round((S.masteredConcepts.size / Object.keys(CONCEPTS).length) * 100) + '%';
+}
+
+function pickConcepts() {
+  const unmastered = Object.keys(CONCEPTS).filter(k => !S.masteredConcepts.has(k));
+  if (!unmastered.length) return [];
+  const pool = unmastered.filter(k => !S.testedConcepts.has(k));
+  return (pool.length ? pool : unmastered).sort(() => Math.random()-0.5).slice(0, Math.min(2, unmastered.length));
+}
+
+function pips() {
+  return Array.from({length: MAX_EXCHANGES}, (_, i) => {
+    const cls = i < S.exchangeCount ? (i === MAX_EXCHANGES-1 ? 'pip last' : 'pip used') : 'pip';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function threadBubbles() {
+  return S.thread.map(b => `
+    <div class="bubble ${b.role}">
+      <div class="bubble-label">${b.label}</div>
+      ${b.content}
+    </div>`).join('');
+}
+
+function scenarioHtml() {
+  const cnames = S.currentConcepts.map(k => CONCEPTS[k].name).join(' · ');
+  return `
+    <div class="scenario-card">
+      <div class="scenario-sport-bar">
+        <span>${SPORT_EMOJI[S.scenarioSport]||'🏅'} ${S.scenarioSport.toUpperCase()} · ${cnames}</span>
+      </div>
+      <div class="scenario-body">${S.scenario}</div>
+    </div>`;
+}
+
+function inputHtml() {
+  const left = MAX_EXCHANGES - S.exchangeCount;
+  const counter = S.exchangeCount > 0 ? `
+    <div class="exchange-counter">
+      <div class="exchange-pips">${pips()}</div>
+      <span>${left > 0 ? `${left} exchange${left!==1?'s':''} remaining` : 'Final exchange'}</span>
+    </div>` : '';
+  return `
+    <div class="input-area" id="inputArea">
+      ${counter}
+      <textarea class="response-area" id="responseInput" placeholder="Share your thinking..." rows="4"></textarea>
+      <button class="submit-btn" id="submitBtn" onclick="submitResponse()">SEND RESPONSE</button>
+    </div>`;
+}
+
+function renderFull() {
+  mc(`
+    ${scenarioHtml()}
+    <div class="thread" id="threadArea">${threadBubbles()}</div>
+    ${inputHtml()}
+  `);
+  scrollBottom();
+}
+
+// ── START ROUND ──
+async function startRound() {
+  S.currentConcepts = pickConcepts();
+  if (!S.currentConcepts.length) { showMastery(); return; }
+  S.currentConcepts.forEach(k => S.testedConcepts.add(k));
+  S.thread = [];
+  S.apiMessages = [];
+  S.exchangeCount = 0;
+  updateUI();
+
+  S.scenarioSport = SPORTS[Math.floor(Math.random() * SPORTS.length)];
+  const cnames = S.currentConcepts.map(k => CONCEPTS[k].name).join(' and ');
+  const cdefs  = S.currentConcepts.map(k => `${CONCEPTS[k].name}: ${CONCEPTS[k].definition}`).join('\n');
+
+  mc(`<div class="loading-indicator"><div class="spinner"></div>Creating your scenario...</div>`);
+
+  try {
+    S.scenario = await callClaude(
+      [{ role:'user', content:`Write scenario. Round ${S.round}.` }],
+      `You write short vivid sports scenarios for a high school leadership training app.
+Write ONLY the scenario — no labels, no questions.
+3-5 sentences. Present tense. Second person.
+Include specific details: score, time, player name, team name.
+The scenario should put the athlete in a position where ${cnames} is tested.
+Concepts: ${cnames}
+Definitions: ${cdefs}
+Sport: ${S.scenarioSport}
+Round: ${S.round} — use a different narrative angle each round.`
+    );
+
+    renderFull();
+    await askCoach(true);
+  } catch(e) {
+    mc(`<p style="color:var(--red);padding:20px;">Connection error — please refresh and try again.</p>`);
+  }
+}
+
+// ── COACH QUESTION ──
+async function askCoach(isOpening) {
+  const cnames = S.currentConcepts.map(k => CONCEPTS[k].name).join(' and ');
+  const cdefs  = S.currentConcepts.map(k => `${CONCEPTS[k].name}: ${CONCEPTS[k].definition}\nCoaching cue: ${CONCEPTS[k].cue}`).join('\n');
+
+  appendLoading('Coach is thinking...');
+
+  const system = isOpening
+    ? `You are an expert high school sports leadership coach starting a Socratic dialogue.
+The athlete just read this scenario: "${S.scenario}"
+Concepts: ${cnames}. Definitions: ${cdefs}
+Ask ONE open-ended probing question to get them thinking about the leadership concept(s).
+Do NOT explain the concept. Do NOT give the answer.
+1-2 sentences. Conversational. No label like "Coach:".`
+    : `You are an expert high school sports leadership coach in a Socratic dialogue.
+Scenario: "${S.scenario}"
+Concepts: ${cnames}. Definitions and cues: ${cdefs}
+Exchange ${S.exchangeCount} of ${MAX_EXCHANGES}.
+${S.exchangeCount >= MAX_EXCHANGES ? 'This is the FINAL exchange.' : ''}
+Rules:
+- Use probing questions to draw out understanding — never give the answer directly.
+- If on track: affirm briefly then push deeper with a follow-up question.
+- If off track: acknowledge what they said, redirect with a question pointing toward the concept.
+- If FINAL exchange: wrap up — acknowledge what they demonstrated, now you can name the concept directly, give one memorable coaching takeaway. Then on the very last line write ONLY this JSON: {"mastered":true} or {"mastered":false}
+3-5 sentences max. No label like "Coach:".`;
+
+  try {
+    const reply = await callClaude(S.apiMessages, system);
+    removeLoader();
+
+    let display = reply;
+    let mastered = null;
+
+    if (S.exchangeCount >= MAX_EXCHANGES) {
+      const match = reply.match(/\{[^}]*"mastered"\s*:\s*(true|false)[^}]*\}/);
+      if (match) {
+        mastered = JSON.parse(match[0]).mastered;
+        display = reply.replace(match[0], '').trim();
+      }
+    }
+
+    S.apiMessages.push({ role:'assistant', content: reply });
+    S.thread.push({ role:'coach', label:'COACH', content: display });
+
+    if (mastered !== null) {
+      if (mastered) {
+        S.streak++;
+        if (S.streak >= MASTERY_STREAK) S.currentConcepts.forEach(k => S.masteredConcepts.add(k));
+      } else {
+        S.streak = 0;
+      }
+      updateUI();
+      renderWrapup(mastered);
+    } else {
+      renderFull();
+    }
+  } catch(e) {
+    removeLoader();
+    mc(`<p style="color:var(--red);padding:20px;">Connection error — please refresh and try again.</p>`);
+  }
+}
+
+// ── ATHLETE SUBMITS ──
+async function submitResponse() {
+  const input = el('responseInput');
+  const response = (input?.value || '').trim();
+  if (response.length < 10) { if (input) input.style.borderColor = 'var(--red)'; return; }
+
+  const btn = el('submitBtn');
+  if (btn) btn.disabled = true;
+
+  S.exchangeCount++;
+  S.apiMessages.push({ role:'user', content: response });
+  S.thread.push({ role:'athlete', label:'YOU', content: response });
+
+  const threadArea = el('threadArea');
+  if (threadArea) threadArea.innerHTML = threadBubbles();
+  const inputArea = el('inputArea');
+  if (inputArea) inputArea.remove();
+
+  await askCoach(false);
+}
+
+// ── WRAPUP ──
+function renderWrapup(mastered) {
+  const cnames = S.currentConcepts.map(k => CONCEPTS[k].name).join(' · ');
+  const allDone = S.masteredConcepts.size >= Object.keys(CONCEPTS).length;
+  const nextLabel = allDone ? 'COMPLETE MODULE' : (mastered ? 'NEXT CONCEPT' : 'NEW SCENARIO');
+
+  mc(`
+    ${scenarioHtml()}
+    <div class="thread">${threadBubbles()}</div>
+    <div class="wrapup-card ${mastered ? 'mastered-round' : 'not-mastered'}">
+      <div class="wrapup-header">${mastered ? '✓ Concept demonstrated' : '↑ Keep building'} · Streak: ${S.streak}/${MASTERY_STREAK}</div>
+      <div class="wrapup-body">${mastered
+        ? `You demonstrated understanding of <strong>${cnames}</strong> through this conversation. That counts toward your mastery streak.`
+        : `Good effort working through this. A new scenario will give you another opportunity to develop these concepts.`
+      }</div>
+    </div>
+    <button class="continue-btn" onclick="${allDone ? 'showMastery()' : 'nextRound()'}">${nextLabel}</button>
+  `);
+  scrollBottom();
+}
+
+// ── NEXT ROUND ──
+function nextRound() {
+  S.round++;
+  if (S.masteredConcepts.size >= Object.keys(CONCEPTS).length) { showMastery(); return; }
+  if (S.streak >= MASTERY_STREAK) S.streak = 0;
+  startRound();
+}
+
+// ── MASTERY ──
+function showMastery() {
+  const mastered = Object.keys(CONCEPTS).filter(k => S.masteredConcepts.has(k));
+  mc(`
+    <div class="mastery-screen">
+      <span class="mastery-icon">🏆</span>
+      <div class="mastery-headline">Module Complete</div>
+      <p class="mastery-sub">You've demonstrated leadership understanding across ${mastered.length} core concept${mastered.length!==1?'s':''} through real coaching conversations.</p>
+      <div>${mastered.map(k=>`<span class="mastery-concept">✓ ${CONCEPTS[k].name}</span>`).join('')}</div>
+      <div style="margin-top:24px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;">SCENARIOS COMPLETED: ${S.round-1}</div>
+      <button class="next-module-btn" onclick="alert('Next module: Communication & Team Dynamics — coming soon!')">NEXT MODULE →</button>
+    </div>
+  `);
+  for (let i = 0; i < MASTERY_STREAK; i++) {
+    const d = el(`dot${i}`);
+    if (d) d.className = 'dot filled';
+  }
+  el('progressFill').style.width = '100%';
+}
+
+startRound();
+</script>
+</body>
+</html>
