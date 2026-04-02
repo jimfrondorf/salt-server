@@ -582,8 +582,12 @@ Rules:
 - If FINAL exchange: wrap up — acknowledge what they demonstrated, now you can name the concept directly, give one memorable coaching takeaway. Then on the very last line write ONLY this JSON: {"mastered":true} or {"mastered":false}
 3-5 sentences max. No label like "Coach:".`;
 
+  const messages = (isOpening && S.apiMessages.length === 0)
+    ? [{ role: 'user', content: 'Start the coaching session.' }]
+    : S.apiMessages;
+
   try {
-    const reply = await callClaude(S.apiMessages, system);
+    const reply = await callClaude(messages, system);
     removeLoader();
 
     let display = reply;
