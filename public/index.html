@@ -552,7 +552,7 @@ Round: ${S.round} — use a different narrative angle each round.`
     renderFull();
     await askCoach(true);
   } catch(e) {
-    mc(`<p style="color:var(--red);padding:20px;">Connection error — please refresh and try again.</p>`);
+    mc(`<p style="color:var(--red);padding:20px;">Connection error — please refresh and try again.<br><small style="opacity:0.6;">${e.message}</small></p>`);
   }
 }
 
