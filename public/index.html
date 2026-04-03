@@ -342,6 +342,117 @@ header {
 @keyframes spin    { to { transform:rotate(360deg); } }
 @keyframes bounce  { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.15)} 80%{transform:scale(0.95)} 100%{transform:scale(1);opacity:1} }
 
+/* ── SETUP SCREEN ── */
+.setup-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: slideUp 0.4s forwards;
+}
+.setup-header {
+  background: var(--gold);
+  padding: 10px 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--black);
+}
+.setup-section {
+  padding: 20px 22px 0;
+}
+.setup-section:last-of-type { padding-bottom: 4px; }
+.setup-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.setup-hint {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+  opacity: 0.7;
+  margin-left: 6px;
+}
+.concept-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.concept-pick-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.concept-pick-btn:hover { border-color: var(--gold); color: var(--gold); }
+.concept-pick-btn.selected { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.12); }
+.setup-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.toggle-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+.setup-textarea {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--white);
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+}
+.setup-textarea:focus { border-color: var(--gold); }
+.setup-textarea::placeholder { color: var(--muted); font-size: 13px; }
+.setup-select {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--white);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  margin-bottom: 4px;
+}
+.setup-select:focus { border-color: var(--gold); }
+.setup-actions {
+  padding: 20px 22px 22px;
+}
+
 @media (max-width: 480px) {
   header { padding: 14px 16px; }
   .main  { padding: 20px 14px 80px; }
@@ -393,7 +504,15 @@ const S = {
   thread: [],
   apiMessages: [],
   exchangeCount: 0,
+  // setup screen state
+  customScenario: '',
+  customSport: '',
+  customConcepts: [],
+  targetUnderstanding: '',
 };
+
+let _pickedConcepts = new Set();
+let _scenarioMode = 'auto';
 
 const CONCEPTS = {
   vision: {
@@ -519,9 +638,110 @@ function renderFull() {
   scrollBottom();
 }
 
+// ── SETUP SCREEN ──
+function showSetup() {
+  _pickedConcepts = new Set();
+  _scenarioMode = 'auto';
+
+  const conceptBtns = Object.keys(CONCEPTS).map(k =>
+    `<button class="concept-pick-btn" id="pick-${k}" onclick="toggleConceptPick('${k}')">${CONCEPTS[k].name}</button>`
+  ).join('');
+
+  const sportOptions = SPORTS.map(s =>
+    `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`
+  ).join('');
+
+  mc(`
+    <div class="setup-card">
+      <div class="setup-header">Configure Round</div>
+
+      <div class="setup-section">
+        <div class="setup-label">Concepts to Focus On
+          <span class="setup-hint">Pick 1–2, or leave blank for random</span>
+        </div>
+        <div class="concept-picker">${conceptBtns}</div>
+      </div>
+
+      <div class="setup-section" style="padding-top:18px;">
+        <div class="setup-label">Scenario</div>
+        <div class="setup-toggle">
+          <button class="toggle-btn active" id="toggleAuto" onclick="setScenarioMode('auto')">Auto-generate</button>
+          <button class="toggle-btn" id="toggleCustom" onclick="setScenarioMode('custom')">Write my own</button>
+        </div>
+        <div id="autoFields">
+          <div class="setup-label">Sport <span class="setup-hint">optional</span></div>
+          <select class="setup-select" id="sportSelect">
+            <option value="">Random</option>
+            ${sportOptions}
+          </select>
+        </div>
+        <div id="customFields" style="display:none;">
+          <textarea class="setup-textarea" id="customScenarioInput" rows="5"
+            placeholder="Write the scenario the athlete will face. Be specific — include names, stakes, and the leadership challenge."></textarea>
+          <select class="setup-select" id="customSportSelect" style="margin-top:8px;">
+            <option value="">No specific sport</option>
+            ${sportOptions}
+          </select>
+        </div>
+      </div>
+
+      <div class="setup-section" style="padding-top:18px;">
+        <div class="setup-label">Target Understanding
+          <span class="setup-hint">What should the athlete grasp? (optional — guides the coach)</span>
+        </div>
+        <textarea class="setup-textarea" id="targetInput" rows="3"
+          placeholder="e.g. The athlete should recognize that a leader communicates their vision clearly and checks that the message actually landed, not just assumes it did."></textarea>
+      </div>
+
+      <div class="setup-actions">
+        <button class="submit-btn" onclick="beginRound()">START SESSION</button>
+      </div>
+    </div>
+  `);
+}
+
+function toggleConceptPick(k) {
+  if (_pickedConcepts.has(k)) {
+    _pickedConcepts.delete(k);
+    el(`pick-${k}`).classList.remove('selected');
+  } else {
+    if (_pickedConcepts.size >= 2) {
+      const first = [..._pickedConcepts][0];
+      _pickedConcepts.delete(first);
+      el(`pick-${first}`).classList.remove('selected');
+    }
+    _pickedConcepts.add(k);
+    el(`pick-${k}`).classList.add('selected');
+  }
+}
+
+function setScenarioMode(mode) {
+  _scenarioMode = mode;
+  el('toggleAuto').classList.toggle('active', mode === 'auto');
+  el('toggleCustom').classList.toggle('active', mode === 'custom');
+  el('autoFields').style.display  = mode === 'auto'   ? '' : 'none';
+  el('customFields').style.display = mode === 'custom' ? '' : 'none';
+}
+
+function beginRound() {
+  S.customConcepts      = [..._pickedConcepts];
+  S.targetUnderstanding = (el('targetInput')?.value || '').trim();
+
+  if (_scenarioMode === 'custom') {
+    S.customScenario = (el('customScenarioInput')?.value || '').trim();
+    S.customSport    = el('customSportSelect')?.value || '';
+  } else {
+    S.customScenario = '';
+    S.customSport    = el('sportSelect')?.value || '';
+  }
+
+  startRound();
+}
+
 // ── START ROUND ──
 async function startRound() {
-  S.currentConcepts = pickConcepts();
+  // Use custom concepts if specified, otherwise pick randomly
+  S.currentConcepts = S.customConcepts.length ? S.customConcepts : pickConcepts();
   if (!S.currentConcepts.length) { showMastery(); return; }
   S.currentConcepts.forEach(k => S.testedConcepts.add(k));
   S.thread = [];
@@ -529,7 +749,16 @@ async function startRound() {
   S.exchangeCount = 0;
   updateUI();
 
-  S.scenarioSport = SPORTS[Math.floor(Math.random() * SPORTS.length)];
+  S.scenarioSport = S.customSport || SPORTS[Math.floor(Math.random() * SPORTS.length)];
+
+  // If a custom scenario was provided, use it directly
+  if (S.customScenario) {
+    S.scenario = S.customScenario;
+    renderFull();
+    await askCoach(true);
+    return;
+  }
+
   const cnames = S.currentConcepts.map(k => CONCEPTS[k].name).join(' and ');
   const cdefs  = S.currentConcepts.map(k => `${CONCEPTS[k].name}: ${CONCEPTS[k].definition}`).join('\n');
 
@@ -563,16 +792,20 @@ async function askCoach(isOpening) {
 
   appendLoading('Coach is thinking...');
 
+  const targetNote = S.targetUnderstanding
+    ? `\nTarget understanding: ${S.targetUnderstanding}`
+    : '';
+
   const system = isOpening
     ? `You are an expert high school sports leadership coach starting a Socratic dialogue.
 The athlete just read this scenario: "${S.scenario}"
-Concepts: ${cnames}. Definitions: ${cdefs}
+Concepts: ${cnames}. Definitions: ${cdefs}${targetNote}
 Ask ONE open-ended probing question to get them thinking about the leadership concept(s).
 Do NOT explain the concept. Do NOT give the answer.
 1-2 sentences. Conversational. No label like "Coach:".`
     : `You are an expert high school sports leadership coach in a Socratic dialogue.
 Scenario: "${S.scenario}"
-Concepts: ${cnames}. Definitions and cues: ${cdefs}
+Concepts: ${cnames}. Definitions and cues: ${cdefs}${targetNote}
 Exchange ${S.exchangeCount} of ${MAX_EXCHANGES}.
 ${S.exchangeCount >= MAX_EXCHANGES ? 'This is the FINAL exchange.' : ''}
 Rules:
@@ -669,7 +902,7 @@ function nextRound() {
   S.round++;
   if (S.masteredConcepts.size >= Object.keys(CONCEPTS).length) { showMastery(); return; }
   if (S.streak >= MASTERY_STREAK) S.streak = 0;
-  startRound();
+  showSetup();
 }
 
 // ── MASTERY ──
@@ -692,7 +925,7 @@ function showMastery() {
   el('progressFill').style.width = '100%';
 }
 
-startRound();
+showSetup();
 </script>
 </body>
 </html>
